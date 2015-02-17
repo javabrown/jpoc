@@ -1,0 +1,13 @@
+<hibernate-mapping package="net.viralpatel.hibernate">
+ 
+    <class name="Employee" table="EMPLOYEE">
+        <id name="id" column="ID">
+            <generator class="native">
+        </generator></id>
+        <property name="firstname">
+        <property name="lastname" column="lastname">
+        <property name="birthDate" type="date" column="birth_date">
+        <property name="cellphone" column="cell_phone">
+    </property></property></property></property></class>
+ 
+</hibernate-mapping>
