@@ -1,9 +1,19 @@
 package com.jbrown.clonner;
 
+import java.io.IOException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.codehaus.jackson.map.DeserializationConfig.Feature;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
+import com.jbrown.json.mapper.JsonConverter;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.FieldDictionary;
 import com.thoughtworks.xstream.converters.reflection.ImmutableFieldKeySorter;
@@ -13,7 +23,23 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 
 public class DeepSerializer {
-	public static void main(String[] args) throws JSONException{
+	static Outer _outer = new Outer(1, "first-object", "Extra");
+	
+	public static void main(String[] args) throws JSONException {
+		doJsonTransformTest();
+	}
+	
+	public static void doJsonTransformTest() throws JSONException {
+		JsonConverter mapper = new JsonConverter();
+		  
+		System.out.println(mapper.toJson(_outer));
+		 
+		Outer user = mapper.fromJson(__json, Outer.class);
+  
+		System.out.println("Object converted from JSON=" + user);
+	}
+	
+	public static void doXstreamTransformTest() throws JSONException {
 		BrownXStream xstream = new BrownXStream();
 		
 	    String xml = xstream.toXML(new Outer(1, "first-object", "Extra"));
@@ -43,6 +69,7 @@ public class DeepSerializer {
 	    }
 	}
 	
+	static String __json = "{\"_id\":1,\"_name\":\"first-object\",\"_innerValue\":{\"_id\":2,\"_name\":\"Inner: first-object-2\",\"name\":\"Inner: first-object-2\",\"id\":2},\"_extra\":\"Extra\"}";
 	static String __xml = "<com.jbrown.clonner.Outer><__id>1</__id><__name>first-object</__name><__innerValue><__id>2</__id><__name>Inner: first-object-2</__name></__innerValue></com.jbrown.clonner.Outer>";
 }
 
@@ -54,6 +81,8 @@ class BrownXStream extends XStream {
 		super(new Sun14ReflectionProvider(
 				  new FieldDictionary(new ImmutableFieldKeySorter())),
 				  new DomDriver("utf-8"));
+		//super(new PureJavaReflectionProvider( new FieldDictionary(new ImmutableFieldKeySorter())));
+		//super( new DomDriver("utf-8") );
 	}
 	
 	@Override
@@ -69,15 +98,18 @@ class BrownXStream extends XStream {
 			}
 		};
 	}
-	
-	
 }
 
+@JsonIgnoreProperties(value = { "_extra" })
 class Outer {
     private int _id;
     private String _name; 
     private Inner _innerValue;
     private String _extra;
+    
+    public Outer(){
+ 
+    }
     
 	public Outer(int id, String name, String extra) {
 		super();
@@ -99,6 +131,11 @@ class Inner {
 	private int _id;
 	private String _name;
 
+	public Inner() {
+		this._id = 0;
+		this._name = "";
+	}
+	
 	public Inner(int id, String name) {
 		this._id = id;
 		this._name = name;
